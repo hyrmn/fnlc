@@ -16,7 +16,7 @@ if(!File.Exists(args[0]))
 const int BufferSize = 512 * 1024;
 const byte Rune = (byte)'\n';
 
-using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: BufferSize);
+using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: 1, FileOptions.SequentialScan);
 
 var count = CountLines(file);
 Console.WriteLine(count);
@@ -38,21 +38,16 @@ static unsafe uint CountLines(FileStream file)
     var zero = Vector256<byte>.Zero;
     var accumulator = Vector256<long>.Zero;
 
-    long bytesRead = 0;
-    var fileSize = file.Length;
-
     int read;
 
-    var buffer = new byte[BufferSize];
-
-    while (bytesRead < fileSize)
+    void* ptr = NativeMemory.AlignedAlloc(byteCount: BufferSize, alignment: vectorSize);
+    Span<byte> buffer = new Span<byte>(ptr, BufferSize);
+    
+    try
     {
-        read = file.Read(buffer, 0, BufferSize);
-        bytesRead += read;
-        int i;
-        fixed (byte* ptr = buffer)
+        while ((read = file.Read(buffer, 0, BufferSize)) != 0)
         {
-            for (i = 0; i <= read - vectorSize; i += vectorSize)
+            for (int i = 0; i <= read - vectorSize; i += vectorSize)
             {
                 var v = Avx2.LoadVector256(ptr + i);
                 var masked = Avx2.CompareEqual(v, runeMask);
@@ -60,6 +55,10 @@ static unsafe uint CountLines(FileStream file)
                 count += Popcnt.PopCount((uint)result);
             }
         }
+    }
+    finally
+    {
+        NativeMemory.AlignedFree(ptr);
     }
 
     return count;
