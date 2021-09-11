@@ -16,7 +16,7 @@ if(!File.Exists(args[0]))
 const int BufferSize = 512 * 1024;
 const byte Rune = (byte)'\n';
 
-using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: BufferSize);
+using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: 1, FileOptions.SequentialScan);
 
 var count = CountLines(file);
 Console.WriteLine(count);
@@ -28,8 +28,10 @@ static unsafe uint CountLines(FileStream file)
     const int vectorSize = 256 / 8; //256 bits, 8 bits in a byte.
     var maskSrc = stackalloc byte[vectorSize];
     var scratch = stackalloc byte[vectorSize];
+    int i;
+    int read;
 
-    for (var i = 0; i < vectorSize; i++)
+    for (i = 0; i < vectorSize; i++)
     {
         maskSrc[i] = Rune;
     }
@@ -38,18 +40,10 @@ static unsafe uint CountLines(FileStream file)
     var zero = Vector256<byte>.Zero;
     var accumulator = Vector256<long>.Zero;
 
-    long bytesRead = 0;
-    var fileSize = file.Length;
-
-    int read;
-
     var buffer = new byte[BufferSize];
 
-    while (bytesRead < fileSize)
+    while ((read = file.Read(buffer, 0, BufferSize)) > 0)
     {
-        read = file.Read(buffer, 0, BufferSize);
-        bytesRead += read;
-        int i;
         fixed (byte* ptr = buffer)
         {
             for (i = 0; i <= read - vectorSize; i += vectorSize)
