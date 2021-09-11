@@ -37,4 +37,4 @@ So the full run might look like
 
 ## Special Thanks
 
-I'd like to thank Ben Dornis of [linksfor.dev(s)](https://linksfor.dev/) fame for cracking the mystery of how to get a Vector256 into a Popcount. This approach wasn't worth it until we got that code.
+I'd like to thank [@buildstarted](https://github.com/buildstarted) of [linksfor.dev(s)](https://linksfor.dev/) fame for cracking the mystery of how to get a Vector256 into a Popcount. This approach wasn't worth it until we got that code.
