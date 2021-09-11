@@ -38,3 +38,5 @@ So the full run might look like
 ## Special Thanks
 
 I'd like to thank [@buildstarted](https://github.com/buildstarted) of [linksfor.dev(s)](https://linksfor.dev/) fame for cracking the mystery of how to get a Vector256 into a Popcount. This approach wasn't worth it until we got that code.
+
+And I'd like to thank [Adam Sitnik](https://github.com/adamsitnik) for his help and pointers on cleaning the code up and squeezing more performance out of this code.
