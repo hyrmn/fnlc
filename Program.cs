@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.Toolkit.HighPerformance;
+
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
@@ -42,17 +44,23 @@ static unsafe uint CountLines(FileStream file)
     Span<byte> buffer = new Span<byte>(ptr, BufferSize);
 
     int bytesRead;
+    int bytesProcessed;
 
     try
     {
         while ((bytesRead = file.Read(buffer)) != 0)
         {
-            for (var i = 0; i <= bytesRead - vectorSize; i += vectorSize)
+            for (bytesProcessed = 0; bytesProcessed <= bytesRead - vectorSize; bytesProcessed += vectorSize)
             {
-                var v = Avx2.LoadVector256(ptr + i);
+                var v = Avx2.LoadVector256(ptr + bytesProcessed);
                 var masked = Avx2.CompareEqual(v, runeMask);
                 var result = Avx2.MoveMask(masked);
                 count += Popcnt.PopCount((uint)result);
+            }
+
+            if(bytesProcessed < bytesRead)
+            {
+                count += (uint)buffer.Slice(bytesProcessed, bytesRead).Count(Rune);
             }
         }
     }
