@@ -19,7 +19,7 @@ if (!File.Exists(args[0]))
 const int BufferSize = 512 * 1024;
 const byte Rune = (byte)'\n';
 
-using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: 1, FileOptions.SequentialScan);
+using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, FileOptions.SequentialScan);
 
 var count = CountLines(file);
 Console.WriteLine(count);
@@ -57,13 +57,13 @@ static unsafe uint CountLines(FileStream file)
                 var result = Avx2.MoveMask(masked);
                 count += Popcnt.PopCount((uint)result);
             }
-        }
 
-        //On the very last read, we read in a few more bytes than we processed. So, we need to go through those now.
-        //A straightforward way to do that is to now rely on the .Count extension from the high performance toolkit.
-        if (bytesProcessed < bytesRead)
-        {
-            count += (uint)buffer.Slice(bytesProcessed, bytesRead - bytesProcessed).Count(Rune);
+            //On the very last read, we read in a few more bytes than we processed. So, we need to go through those now.
+            //A straightforward way to do that is to now rely on the .Count extension from the high performance toolkit.
+            if (bytesProcessed < bytesRead)
+            {
+                count += (uint)buffer.Slice(bytesProcessed, bytesRead - bytesProcessed).Count(Rune);
+            }
         }
     }
     finally
