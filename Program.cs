@@ -44,7 +44,7 @@ static unsafe uint CountLines(FileStream file)
     Span<byte> buffer = new Span<byte>(ptr, BufferSize);
 
     int bytesRead;
-    int bytesProcessed;
+    int bytesProcessed = 0;
 
     try
     {
@@ -57,11 +57,13 @@ static unsafe uint CountLines(FileStream file)
                 var result = Avx2.MoveMask(masked);
                 count += Popcnt.PopCount((uint)result);
             }
+        }
 
-            if(bytesProcessed < bytesRead)
-            {
-                count += (uint)buffer.Slice(bytesProcessed, bytesRead - bytesProcessed).Count(Rune);
-            }
+        //On the very last read, we read in a few more bytes than we processed. So, we need to go through those now.
+        //A straightforward way to do that is to now rely on the .Count extension from the high performance toolkit.
+        if (bytesProcessed < bytesRead)
+        {
+            count += (uint)buffer.Slice(bytesProcessed, bytesRead - bytesProcessed).Count(Rune);
         }
     }
     finally
