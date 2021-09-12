@@ -60,7 +60,7 @@ static unsafe uint CountLines(FileStream file)
 
             if(bytesProcessed < bytesRead)
             {
-                count += (uint)buffer.Slice(bytesProcessed, bytesRead).Count(Rune);
+                count += (uint)buffer.Slice(bytesProcessed, bytesRead - bytesProcessed).Count(Rune);
             }
         }
     }
