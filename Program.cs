@@ -19,7 +19,7 @@ if (!File.Exists(args[0]))
 const int BufferSize = 512 * 1024;
 const byte Rune = (byte)'\n';
 
-using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, FileOptions.SequentialScan);
+using var file = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: 1, FileOptions.SequentialScan);
 
 var count = CountLines(file);
 Console.WriteLine(count);
@@ -38,7 +38,6 @@ static unsafe uint CountLines(FileStream file)
 
     var runeMask = Avx2.LoadVector256(maskSrc);
     var zero = Vector256<byte>.Zero;
-    var accumulator = Vector256<long>.Zero;
 
     byte* ptr = (byte*)NativeMemory.AlignedAlloc(byteCount: BufferSize, alignment: vectorSize);
     Span<byte> buffer = new Span<byte>(ptr, BufferSize);
