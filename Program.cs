@@ -37,7 +37,6 @@ static unsafe uint CountLines(FileStream file)
     }
 
     var runeMask = Avx2.LoadVector256(maskSrc);
-    var zero = Vector256<byte>.Zero;
 
     byte* ptr = (byte*)NativeMemory.AlignedAlloc(byteCount: BufferSize, alignment: vectorSize);
     Span<byte> buffer = new Span<byte>(ptr, BufferSize);
