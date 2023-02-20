@@ -14,7 +14,7 @@ Clone this repository and then run `dotnet build` from the solution root.
 > dotnet build -c Release --nologo
 ```
 
-This will create a release build of the utility at `/bin/Release/net6.0/nlc.exe`. From there, you will need to copy it to a place in your `%PATH%`.
+This will create a release build of the utility at `/bin/Release/net6.0/fnlc.exe`. From there, you will need to copy it to a place in your `%PATH%`.
 
 ## How to Use
 
